@@ -23,16 +23,14 @@ function App() {
   const [streak, setStreak] = useState(0);
 
   useEffect(() => {
-    fetch(`${API_BASE}/authorized`).then((resp) => {
-      if (resp.ok) {
-        resp.json().then((user) => {
-          setUser(user);
-          setLoading(false);
-        });
-      } else {
-        setLoading(false);
-      }
-    });
+    fetch(`${API_BASE}/authorized`)
+      .then((resp) => {
+        if (resp.ok) {
+          return resp.json().then((user) => setUser(user));
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   function handleLogOut() {
