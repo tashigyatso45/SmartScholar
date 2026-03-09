@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Switch, Route } from "react-router-dom";
 import Signup from "./Signup";
 import Home from "./Home";
 import API_BASE from "../api";
