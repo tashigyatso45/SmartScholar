@@ -1,3 +1,4 @@
+import API_BASE from "../api";
 import {
   Button,
   TextField,
@@ -34,19 +35,20 @@ function SignupForm({ setUser }) {
   const signupSchema = yup.object().shape({
     username: yup
       .string()
-      .min(5, "Username must be at least 5 characters")
+      .min(5, "Username must be at least 5 characters long")
       .max(15, "Username must be 15 characters or fewer")
       .required("Username is required"),
-    email: yup.string().email("That doesn't look like a valid email"),
+    email: yup.string().email("Please enter a valid email address (e.g. name@example.com)"),
     password: yup
       .string()
-      .min(5, "Password must be at least 5 characters")
+      .min(5, "Password must be at least 5 characters long")
       .max(15, "Password must be 15 characters or fewer")
       .required("Password is required"),
     grade_level: yup
       .number()
-      .min(1, "Please pick a grade")
-      .max(3, "Please pick a grade"),
+      .min(1, "Please select your grade level")
+      .max(3, "Please select your grade level")
+      .required("Please select your grade level"),
   });
 
   const loginSchema = yup.object().shape({
@@ -60,7 +62,7 @@ function SignupForm({ setUser }) {
     onSubmit: (values) => {
       setIsSubmitting(true);
       setServerError(null);
-      const endpoint = isLogin ? "/login" : "/register";
+      const endpoint = isLogin ? `${API_BASE}/login` : `${API_BASE}/register`;
       fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -72,16 +74,21 @@ function SignupForm({ setUser }) {
           } else {
             resp
               .json()
-              .then((data) =>
-                setServerError(
-                  data.error || data.message || "Something went wrong. Please try again!"
-                )
-              )
+              .then((data) => {
+                if (resp.status === 401) {
+                  setServerError("Incorrect username or password. Please try again, or create a new account.");
+                } else if (resp.status === 409) {
+                  setServerError("That username is already taken. Please choose a different one.");
+                } else {
+                  setServerError(data.error || data.message || "Something went wrong. Please try again!");
+                }
+              })
               .catch(() =>
-                setServerError("Something went wrong. Please try again!")
+                setServerError("Could not connect to the server. Please try again!")
               );
           }
         })
+        .catch(() => setServerError("Could not connect to the server. Please check your connection."))
         .finally(() => setIsSubmitting(false));
     },
   });
@@ -164,7 +171,10 @@ function SignupForm({ setUser }) {
                   helperText={formik.touched.email && formik.errors.email}
                 />
 
-                <FormControl fullWidth>
+                <FormControl
+                  fullWidth
+                  error={formik.touched.grade_level && Boolean(formik.errors.grade_level)}
+                >
                   <InputLabel id="grade-level-label">
                     What grade are you in?
                   </InputLabel>
@@ -183,6 +193,11 @@ function SignupForm({ setUser }) {
                       </MenuItem>
                     ))}
                   </Select>
+                  {formik.touched.grade_level && formik.errors.grade_level && (
+                    <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.75 }}>
+                      {formik.errors.grade_level}
+                    </Typography>
+                  )}
                 </FormControl>
               </Stack>
             </Collapse>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import API_BASE from "../api";
 import Subjectcard from "./Subjectcard";
 import ProblemView from "./ProblemView";
 import {
@@ -50,7 +51,7 @@ export default function Home({ onAnswer }) {
   const [problemsError, setProblemsError] = useState(null);
 
   useEffect(() => {
-    fetch("/home").then((resp) => {
+    fetch(`${API_BASE}/home`).then((resp) => {
       if (resp.ok) {
         resp.json().then((data) => {
           setSubjects(data);
@@ -78,7 +79,7 @@ export default function Home({ onAnswer }) {
     try {
       // Try cached problems first
       const resp = await fetch(
-        `/problems?subject=${encodeURIComponent(selectedSubject.type_operation)}&difficulty=${difficulty}`
+        `${API_BASE}/problems?subject=${encodeURIComponent(selectedSubject.type_operation)}&difficulty=${difficulty}`
       );
       const cached = await resp.json();
 
@@ -89,7 +90,7 @@ export default function Home({ onAnswer }) {
       }
 
       // No cache — generate with Claude
-      const genResp = await fetch("/problems/generate", {
+      const genResp = await fetch(`${API_BASE}/problems/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

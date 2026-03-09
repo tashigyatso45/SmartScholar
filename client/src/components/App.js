@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Switch, Route } from "react-router-dom";
 import Signup from "./Signup";
 import Home from "./Home";
+import API_BASE from "../api";
 import {
   AppBar,
   Toolbar,
@@ -23,7 +24,7 @@ function App() {
   const [streak, setStreak] = useState(0);
 
   useEffect(() => {
-    fetch("/authorized").then((resp) => {
+    fetch(`${API_BASE}/authorized`).then((resp) => {
       if (resp.ok) {
         resp.json().then((user) => {
           setUser(user);
@@ -36,7 +37,7 @@ function App() {
   }, []);
 
   function handleLogOut() {
-    fetch("/logout", { method: "DELETE" }).then((resp) => {
+    fetch(`${API_BASE}/logout`, { method: "DELETE" }).then((resp) => {
       if (resp.ok) {
         setUser(null);
         setScore(0);
